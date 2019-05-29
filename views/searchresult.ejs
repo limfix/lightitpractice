@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Результат поиска</title>
+    <meta charset="utf-8" />
+</head>
+<body>
+     
+    <h1>Результат поиска</h1>
+     
+    <% if(videoVisible) {%>
+        <h3>Videos:</h3>
+        <ul>
+            <% for(var i=0; i<data.length;i++) {%>
+                <li><%=data[i].snippet.title%></li><br>
+                <img src=<%=data[i].snippet.thumbnails.default.url %> alt="Italian Trulli"><br>
+                <li><%=data[i].snippet.publishedAt%></li>
+            <%} %>
+        </ul>
+    <% }else {%>
+        <h3>Электронный адрес отсутствует</h3>
+    <%} %>
+</body>
+<html>
