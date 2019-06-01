@@ -7,6 +7,7 @@ const v = require('./server/videoHandle');
 
 const app = express();
 const client_key = "YOUR_SECRET_KEY";
+const userId = "1337";
 
 app.set('view engine', 'ejs')
 app.set('views', path.join(__dirname, 'views'))
@@ -14,7 +15,7 @@ app.set('port', (process.env.PORT || 3000));
 app.use(bodyParser.urlencoded({ extended: true })); 
 
 app.use('/search', (req, res) => {
-    let query = req.body.search_query;
+    let query = req.query.q;
     if(query !== "") {
         rp({
             uri: `https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=25&q=${query}&type=video&key=${client_key}`,
@@ -24,22 +25,30 @@ app.use('/search', (req, res) => {
             json: true
         })
         .then((data) => {
-            let videos = [];
-            data.items.forEach(element => {
-                videos.push({
-                    id: element.id.videoId,
-                    button: v.inPlaylist(element.id.videoId),
-                    pubDate: element.snippet.publishedAt,
-                    title: element.snippet.title,
-                    img: element.snippet.thumbnails.default.url
-                })
+            let buttonsList = [];
+            v.getPlaylist(userId, function(err, playlist) {
+                if (err) {
+                  console.log(err);
+                }
+                data.items.forEach(element => {
+                    let _result;
+                    if(playlist == undefined) {
+                        _result = false;
+                    }
+                    else {
+                        _result = (playlist.videoList.includes(element.id.videoId));
+                    }
+                    buttonsList.push({
+                        button: _result,
+                    });
+                });
+                res.render('index', {
+                    data: data.items,
+                    listType: 'search',
+                    buttons: buttonsList,
+                    videoVisible: true
+                });
             });
-            console.log(videos);
-            res.render('index', {
-                data: data.items,
-                //buttons: buttons,
-                videoVisible: true
-            })
         })
         .catch((err) => {
             console.log(err)
@@ -49,26 +58,56 @@ app.use('/search', (req, res) => {
     
 })
 
-app.use('/update', (req, res) => {
+
+
+app.use('/playlist', function(req, res) {
+    v.getPlaylist(userId, function(err, playlist) {
+        if (err) {
+          console.log(err);
+        }
+        let videoIdList = playlist.videoList;
+        rp({
+            uri: `https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=${videoIdList}&key=${client_key}`,
+            qs: {
+                method: 'GET'
+              },
+            json: true
+        })
+        .then((data) => {
+            res.render('index',{
+                data: data.items,
+                listType: 'playlist',
+                videoVisible: true
+            })
+        })    
+    })
+});
+
+app.post('/update', (req, res) => {
     let videoId = req.body.video_id;
-    if(!v.inPlaylist(videoId)){
-        v.saveInPlaylist(videoId);
-    };
-    res.send('done');
+    v.getPlaylist(userId, function(err, playlist) {
+        if (err) {
+          console.log(err);
+        }
+        if ( playlist == undefined ) {
+            v.createPlaylist(userId, videoId);
+            console.log(`Created playlist for user ${userId} with video ${videoId}`);
+        }  
+        else if(playlist.videoList.indexOf(videoId) == -1) {
+            console.log(`Added to playlist with user ${userId} a video ${videoId}`);
+            v.saveInPlaylist(userId,videoId);
+        }
+        else{
+            console.log(`Video ${videoId} deleted from playlist of ${userId} user`);
+            v.deleteFromPlaylist(userId,videoId);
+        }
+        res.redirect(req.get('referer'));
+    });
 })
 
 app.use("/", function(req,res){
     res.render('index',{
         videoVisible: false
-    });
-});
-
-app.get("/playlist", function(req, res){
-        
-    Video.find({}, function(err, users){
- 
-        if(err) return console.log(err);
-        res.send(users)
     });
 });
 
