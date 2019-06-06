@@ -1,5 +1,4 @@
 const mongoose = require('mongoose');
-const Video = require('./models/videoSchema');
 const Playlist = require('./models/playlistSchema');
 
 module.exports = {
@@ -36,9 +35,10 @@ module.exports = {
     getPlaylist : function (user_id, callback) {
         Playlist.find({userId: user_id}, function(err, videos) {
             if (err) {
-              callback(err, null);
+                callback(err, null);
             } else {
-              callback(null, videos[0]);
+                console.log("no videos found");
+                callback(null, videos[0]);
             }
         });
     }

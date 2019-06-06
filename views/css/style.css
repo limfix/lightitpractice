@@ -1,0 +1,36 @@
+@media (max-width: 1400px) {
+    .col-md-12 {
+        -ms-flex: 0 0 100%;
+        flex: 0 0 100%;
+        max-width: 100%;
+    }
+
+    .col-md-7 {
+        max-width: 100%;
+    }
+
+    .col-md-5 {
+        -ms-flex: disabled;
+        flex: auto;
+        max-width: 100%;
+    }
+
+}
+
+@media (max-width: 800px) {
+    #mainVideoScreen {
+        width: 100%    !important;
+        height: 100%   !important;
+    }
+}
+
+#logoutBtn {
+    text-align: center;
+    margin: 0 auto;
+}
+
+.video-block {
+    text-align: center;
+    margin: 0 auto;
+    margin-top: 40px;
+}

@@ -5,11 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>YouTube Player</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="../client/cover.css">
+    <link rel="stylesheet" type="text/css" href="/css/style.css" />
+    <link rel="shortcut icon" type="image/x-icon" href="/favicon.png"/>
   </head>
-
+  
   <body class="text-center">
-
+    
     <div class="cover-container d-flex h-50 p-3 mx-auto flex-column">
       <header class="masthead mb-auto">
         <div class="inner">
@@ -35,71 +36,110 @@
             </div>
         </form>
       </main>
+
       
-      <div id="video-content" class="container-fluid">
-          <% if(videoVisible) {%>
-            <div class="mx-auto">
-              <% if(listType == 'search') {%>
-                <h3>
-                  Search Result
-                </h3>
-              <% } %>
-              <% if(listType == 'playlist') {%>
-                <h3>
-                  Your Playlist
-                </h3>
-              <% } %>
-            </div>
-            <% for(var i=0; i<data.length;i++) {%>
-              <div class="row mx-auto">
-                <div class="col-md-10">
-                  <div class="row">
-                    <div class="col-md-6">
-                        <img src=<%=data[i].snippet.thumbnails.default.url %>>
-                    </div>
-                    <div class="col-md-6">
-                      <h6>
-                        <%=data[i].snippet.title%>
-                      </h6>
-                      <p>
-                          <%=data[i].snippet.publishedAt%>
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="col-md-2">
-                  <form method="POST", id="playlist-crud-form" action="/update">
-                    <% if(listType == 'search'){ %>
-                      <input name="video_id", type="hidden", value="<%=data[i].id.videoId%>">
-                      <input name="button_type", type="hidden", value="<%=buttons[i].button%>">
-                      <% if(!buttons[i].button){ %>
-                        <button name ="handle_btn" type="submit" class="btn btn-sm btn-info">
-                          Add
-                        </button>
-                      <% } else{ %>  
-                        <button name ="handle_btn" type="submit" class="btn btn-sm btn-danger">
-                          Delete
-                        </button>
-                      <% } %>
-                    <% } else { %>
-                      <input name="video_id", type="hidden", value="<%=data[i].id%>">
-                      <button name ="handle_btn" type="submit" class="btn btn-sm btn-danger">
-                          Delete
-                      </button>
-                    <% } %>
-                  
-                  </form>
-                </div>
+
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="row">
+              <div class="video-block col-md-7">
+                <!--Main video screen-->
+                <% if(videoVisible) {
+                  if(listType == 'search') {
+                    var videoSrc = 'https://www.youtube.com/embed/'+data[0].id.videoId
+                  }
+                  if(listType == 'playlist') {
+                    var videoSrc = 'https://www.youtube.com/embed/'+data[0].id
+                  }%>
+                  <iframe id="mainVideoScreen" width="720" height="360"
+                    src="<%=videoSrc%>" frameborder='0' allowfullscreen>
+                  </iframe>
+                <% } %>
               </div>
-          <%} %>
-          <% }else {%>
-            
-          <%} %>
+              <div class="col-md-5">
+                  <div id="video-content" class="container">
+                      <% if(videoVisible) {%>
+                        <div class="mx-auto">
+                          <% if(listType == 'search') {%>
+                            <h3>
+                              Search Result
+                            </h3>
+                          <% } %>
+                          <% if(listType == 'playlist') {%>
+                            <h3>
+                              Your Playlist
+                            </h3>
+                          <% } %>
+                        </div>
+                        <% for(var i=0; i<data.length;i++) {%>
+                          <div class="row mx-auto">
+                              <% if(listType == 'search') {%>
+                                <div class="col-md-10" onclick="setSrc('<%=data[i].id.videoId %>')">
+                              <% } %>
+                              <% if(listType == 'playlist') {%>
+                                <div class="col-md-10" onclick="setSrc('<%=data[i].id%>')">
+                              <% } %>
+                            
+                              <div class="row">
+                                <div class="col-md-6">
+                                    <img src=<%=data[i].snippet.thumbnails.default.url %>>
+                                </div>
+                                <div class="col-md-6">
+                                  <h6>
+                                    <%=data[i].snippet.title%>
+                                  </h6>
+                                  <p>
+                                    <%=data[i].snippet.publishedAt%>
+                                  </p>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-md-2">
+                              <form method="POST", id="playlist-crud-form" action="/update">
+                                <% if(listType == 'search'){ %>
+                                  <input name="video_id", type="hidden", value="<%=data[i].id.videoId%>">
+                                  <input name="button_type", type="hidden", value="<%=buttons[i].button%>">
+                                  <% if(!buttons[i].button){ %>
+                                    <button name ="handle_btn" type="submit" class="btn btn-sm btn-info">
+                                      Add
+                                    </button>
+                                  <% } else{ %>  
+                                    <button name ="handle_btn" type="submit" class="btn btn-sm btn-danger">
+                                      Delete
+                                    </button>
+                                  <% } %>
+                                <% } else { %>
+                                  <input name="video_id", type="hidden", value="<%=data[i].id%>">
+                                  <button name ="handle_btn" type="submit" class="btn btn-sm btn-danger">
+                                      Delete
+                                  </button>
+                                <% } %>
+                              
+                              </form>
+                            </div>
+                          </div>
+                      <%} %>
+                      <% }else {%>
+                        
+                      <%} %>
+                  </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
+      
       <footer class="mastfoot mt-auto">
-        
+          <form method="POST", id="formLogout" action="/users/logout">
+            <button id="logoutBtn" type="submit" class="btn btn-sm btn-light">
+              Log Out
+            </button>
+          </form>
       </footer>
     </div>
+    <script src="./js/audioConv.js"></script>
+    <script>src="https://cdnjs.cloudflare.com/ajax/libs/rythm.js/2.2.4/rythm.min.js"</script>
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
